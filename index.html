@@ -219,12 +219,17 @@ async function generate(){
   setStatus('⏳ Đang bung link rút gọn...','');
   try{
     const res = await fetch('/api/build?url=' + encodeURIComponent(url));
-    const ct = res.headers.get('content-type') || '';
-    if(!ct.includes('application/json')){
+    const rawBody = await res.text();
+    if(!rawBody){
+      throw new Error('Server trả về rỗng (HTTP ' + res.status + '). Thử lại — có thể link nguồn phản hồi chậm.');
+    }
+    if(/^\s*</.test(rawBody)){
       throw new Error('API chưa chạy. Deploy lên Cloudflare, hoặc chạy "wrangler pages dev ." (đừng dùng server tĩnh thường).');
     }
-    const data = await res.json();
-    if(!res.ok || !data.link) throw new Error(data.error || 'Server lỗi');
+    let data;
+    try{ data = JSON.parse(rawBody); }
+    catch(e){ throw new Error('Server trả về không hợp lệ (HTTP ' + res.status + '): ' + rawBody.slice(0,120)); }
+    if(!res.ok || !data.link) throw new Error(data.error || ('Server lỗi (HTTP ' + res.status + ')'));
     showResult(data.link);
   }catch(err){
     setStatus('Không bung được link rút gọn: ' + err.message, 'err');

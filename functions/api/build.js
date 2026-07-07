@@ -29,12 +29,21 @@ function json(data, status = 200){
 
 /** Follow redirects to expand a short link into the full shopee.vn URL. */
 async function resolveUrl(url){
-  const res = await fetch(url, {
-    method: 'GET',
-    redirect: 'follow',
-    headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15' }
-  });
-  return res.url || url;  // res.url = URL cuối sau khi đã theo hết redirect
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000); // fail gọn sau 8s thay vì treo
+  try{
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: ctrl.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15' }
+    });
+    // res.url = URL cuối sau khi theo hết redirect. Một số CDN trả về Location tuyệt đối,
+    // nếu res.url không đổi thì thử đọc header 'location' làm dự phòng.
+    return res.url || res.headers.get('location') || url;
+  }finally{
+    clearTimeout(timer);
+  }
 }
 
 /** Giữ lại link sản phẩm/shop sạch, bỏ tham số tracking rác. */
