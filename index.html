@@ -96,6 +96,17 @@
 
   .status{font-size:13px;font-weight:600;min-height:18px;text-align:center;color:var(--muted)}
   footer{font-size:11.5px;color:var(--muted);text-align:center;padding:4px 8px;line-height:1.5}
+
+  /* install banner */
+  .install{display:none;align-items:center;gap:12px;background:#111;color:#fff;border-radius:var(--radius);
+    padding:12px 14px;box-shadow:var(--shadow)}
+  .install.show{display:flex;animation:pop .25s ease}
+  .install .ic{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand),#ff7337);
+    display:grid;place-items:center;font-weight:800;flex:0 0 auto}
+  .install .tx{flex:1;min-width:0;font-size:12.5px;line-height:1.35}
+  .install .tx b{font-size:13.5px}
+  .install button{padding:9px 14px;font-size:13px;border-radius:10px;background:var(--brand);color:#fff;flex:0 0 auto}
+  .install .x{background:transparent;color:#9aa0aa;padding:6px;font-size:18px}
 </style>
 </head>
 <body>
@@ -108,6 +119,13 @@
       <p>Dán link Shopee → tạo link tiếp thị liên kết</p>
     </div>
   </header>
+
+  <div class="install" id="install">
+    <div class="ic">S</div>
+    <div class="tx" id="installTx"><b>Cài app vào màn hình chính</b><br>Mở nhanh, chạy như app thật.</div>
+    <button id="installBtn" type="button">Cài</button>
+    <button class="x" id="installClose" type="button" aria-label="Đóng">✕</button>
+  </div>
 
   <div class="card">
     <label for="input">Link sản phẩm / shop Shopee</label>
@@ -259,7 +277,39 @@ async function pasteFromClipboard(){
 $('#genBtn').addEventListener('click', generate);
 $('#copyBtn').addEventListener('click', copyLink);
 $('#pasteBtn').addEventListener('click', pasteFromClipboard);
-$('#openBtn').addEventListener('click', ()=>{ if(currentLink) window.open(currentLink,'_blank','noopener'); });
+// Open Shopee: the an_redir link is a universal/app link — on mobile it opens the app directly.
+// Same-tab navigation triggers the app more reliably than a new tab.
+$('#openBtn').addEventListener('click', ()=>{
+  if(!currentLink) return;
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(mobile) location.href = currentLink;          // OS intercepts -> opens Shopee app
+  else window.open(currentLink,'_blank','noopener'); // desktop -> new tab
+});
+
+/* ---------- install to home screen ---------- */
+(function initInstall(){
+  const banner=$('#install'), btn=$('#installBtn'), close=$('#installClose'), tx=$('#installTx');
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isStandalone || sessionStorage.getItem('inst_hide')) return;
+
+  let deferred=null;
+  window.addEventListener('beforeinstallprompt', e=>{           // Android / Chrome / Edge
+    e.preventDefault(); deferred=e; banner.classList.add('show');
+  });
+  btn.addEventListener('click', async ()=>{
+    if(deferred){ deferred.prompt(); await deferred.userChoice; deferred=null; banner.classList.remove('show'); }
+  });
+  close.addEventListener('click', ()=>{ banner.classList.remove('show'); sessionStorage.setItem('inst_hide','1'); });
+
+  // iOS Safari doesn't fire beforeinstallprompt -> show manual instructions.
+  if(isiOS && !isStandalone){
+    btn.style.display='none';
+    tx.innerHTML='<b>Cài app trên iPhone</b><br>Bấm nút Chia sẻ ⬆️ → "Thêm vào MH chính".';
+    banner.classList.add('show');
+  }
+})();
+window.addEventListener('appinstalled', ()=> $('#install').classList.remove('show'));
 $('#clearBtn').addEventListener('click', ()=>{ $('#input').value=''; $('#result').classList.remove('show'); setStatus(''); $('#input').focus(); });
 $('#input').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') generate(); });
 
