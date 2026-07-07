@@ -176,7 +176,7 @@ function buildAffiliateLink(originLink){
   const base = isAlreadyAffiliate(originLink)
     ? originLink.split(/[?&]affiliate_id=/)[0]
     : `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(originLink.trim())}`;
-  const sub = CONFIG.SUB_IDS.map(s=>s||'').join('-');
+  const sub = CONFIG.SUB_IDS.map(s=>s||'').join('-').replace(/-+$/,''); // bỏ gạch thừa cuối
   let out = `${base}&affiliate_id=${encodeURIComponent(CONFIG.AFF_ID)}`;
   if(sub.replace(/-/g,'')) out += `&sub_id=${encodeURIComponent(sub)}`;
   return out;
