@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ee4d2d">
-<meta name="description" content="Tạo link tiếp thị liên kết Shopee rút gọn nhanh chóng.">
+<meta name="description" content="Dán link Shopee → nhận link tiếp thị liên kết ngay.">
 <title>Shopee Aff Link</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -37,15 +37,13 @@
   .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
 
   label{display:block;font-size:13px;font-weight:600;margin:0 0 8px;color:#3a3d44}
-  .hint{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.4}
 
-  textarea,input{
+  textarea{
     width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;
     font-size:16px;background:#fafbfc;color:var(--ink);font-family:inherit;
-    transition:border-color .15s, background .15s;
+    resize:none;min-height:80px;transition:border-color .15s, background .15s;
   }
-  textarea{resize:none;min-height:72px}
-  textarea:focus,input:focus{outline:none;border-color:var(--brand);background:#fff}
+  textarea:focus{outline:none;border-color:var(--brand);background:#fff}
 
   .row{display:flex;gap:10px}
   .row>*{flex:1;min-width:0}
@@ -64,7 +62,7 @@
   .btn-open{background:#111;color:#fff}
   button:disabled{opacity:.5;cursor:not-allowed}
 
-  .result{display:none;flex-direction:column;gap:12px}
+  .result{display:none;flex-direction:column;gap:12px;margin-top:14px}
   .result.show{display:flex;animation:pop .25s ease}
   @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .link-box{
@@ -72,18 +70,6 @@
     border-radius:12px;padding:12px 14px;font-size:14px;word-break:break-all;
     color:#7a2417;line-height:1.5;
   }
-
-  details.settings{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:2px 4px}
-  details.settings>summary{
-    list-style:none;cursor:pointer;padding:14px;font-size:14px;font-weight:600;
-    display:flex;align-items:center;justify-content:space-between;color:#3a3d44;
-  }
-  details.settings>summary::-webkit-details-marker{display:none}
-  .chev{transition:transform .2s;color:var(--muted)}
-  details[open] .chev{transform:rotate(180deg)}
-  .settings-body{padding:0 14px 16px;display:flex;flex-direction:column;gap:12px}
-  .sub-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-  .sub-grid input{padding:10px 6px;text-align:center;font-size:13px}
 
   .toast{
     position:fixed;left:50%;bottom:calc(var(--safe-b) + 22px);transform:translateX(-50%) translateY(20px);
@@ -94,10 +80,9 @@
   .toast.err{background:var(--err)}
   .toast.ok{background:var(--ok)}
 
-  .status{font-size:13px;font-weight:600;min-height:18px;text-align:center;color:var(--muted)}
+  .status{font-size:13px;font-weight:600;min-height:18px;text-align:center;color:var(--muted);margin-top:10px}
   footer{font-size:11.5px;color:var(--muted);text-align:center;padding:4px 8px;line-height:1.5}
 
-  /* install banner */
   .install{display:none;align-items:center;gap:12px;background:#111;color:#fff;border-radius:var(--radius);
     padding:12px 14px;box-shadow:var(--shadow)}
   .install.show{display:flex;animation:pop .25s ease}
@@ -116,7 +101,7 @@
     <div class="logo">S</div>
     <div>
       <h1>Shopee Aff Link</h1>
-      <p>Dán link Shopee → tạo link tiếp thị liên kết</p>
+      <p>Dán link Shopee → nhận link tiếp thị liên kết</p>
     </div>
   </header>
 
@@ -132,7 +117,7 @@
     <textarea id="input" inputmode="url" autocomplete="off" spellcheck="false"
       placeholder="Dán link vào đây, ví dụ: https://shopee.vn/..."></textarea>
     <div class="row" style="margin-top:12px">
-      <button class="btn-ghost" id="pasteBtn" type="button">📋 Dán</button>
+      <button class="btn-ghost" id="pasteBtn" type="button">📋 Dán &amp; Tạo</button>
       <button class="btn-line" id="clearBtn" type="button">✕ Xóa</button>
     </div>
     <button class="btn-primary" id="genBtn" type="button" style="margin-top:10px;width:100%">
@@ -149,30 +134,6 @@
     </div>
   </div>
 
-  <details class="settings" id="settings">
-    <summary>
-      <span>⚙️ Cấu hình Affiliate ID &amp; Sub ID</span>
-      <span class="chev">▾</span>
-    </summary>
-    <div class="settings-body">
-      <div>
-        <label for="affId">Affiliate ID (bắt buộc)</label>
-        <input id="affId" inputmode="numeric" autocomplete="off" placeholder="VD: 14354840000">
-      </div>
-      <div>
-        <label>Sub ID (tối đa 5, tùy chọn)</label>
-        <div class="sub-grid">
-          <input class="sub" placeholder="1" autocomplete="off">
-          <input class="sub" placeholder="2" autocomplete="off">
-          <input class="sub" placeholder="3" autocomplete="off">
-          <input class="sub" placeholder="4" autocomplete="off">
-          <input class="sub" placeholder="5" autocomplete="off">
-        </div>
-        <p class="hint">Cấu hình được lưu trên máy bạn, chỉ nhập một lần.</p>
-      </div>
-    </div>
-  </details>
-
   <footer>
     Link tạo theo công thức chính thức của Shopee (<code>s.shopee.vn/an_redir</code>).<br>
     Dữ liệu xử lý ngay trên trình duyệt, không gửi đi đâu.
@@ -182,47 +143,39 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* =====================================================================
+   CẤU HÌNH — SET CỨNG Ở ĐÂY. User không cần nhập gì ngoài link Shopee.
+   ===================================================================== */
+const CONFIG = {
+  AFF_ID: '14354840000',          // <-- ĐỔI THÀNH AFFILIATE ID CỦA BẠN
+  SUB_IDS: ['', '', '', '', '']    // <-- (tùy chọn) tối đa 5 sub_id, để '' nếu không dùng
+};
+/* ===================================================================== */
+
 const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const KEY = 'aff_cfg_v1';
 const SHOPEE_HOSTS = ['shopee.vn','shopee.com','shope.ee','shopee.sg','s.shopee.vn','s.shopee.sg'];
 
-/* ---------- config persistence ---------- */
-function loadCfg(){
-  try{
-    const c = JSON.parse(localStorage.getItem(KEY)||'{}');
-    if(c.affId) $('#affId').value = c.affId;
-    (c.subs||[]).forEach((v,i)=>{ if($$('.sub')[i]) $$('.sub')[i].value = v||''; });
-  }catch(e){}
-}
-function saveCfg(){
-  const cfg = { affId: $('#affId').value.trim(), subs: $$('.sub').map(i=>i.value.trim()) };
-  localStorage.setItem(KEY, JSON.stringify(cfg));
-}
-$('#affId').addEventListener('input', saveCfg);
-$$('.sub').forEach(i=>i.addEventListener('input', saveCfg));
-
-/* ---------- core: build affiliate link (Shopee official formula) ---------- */
+/* ---------- core: build affiliate link (công thức chính thức Shopee) ---------- */
 function extractUrl(text){
   if(!text) return null;
   const m = String(text).match(/(https?:\/\/[^\s"'<>]+)/i);
   return m ? m[0] : null;
 }
 function isShopeeUrl(u){
-  try{ return SHOPEE_HOSTS.some(h => new URL(u).hostname.replace(/^www\./,'') === h || new URL(u).hostname.endsWith('.'+h)); }
+  try{ const h=new URL(u).hostname.replace(/^www\./,''); return SHOPEE_HOSTS.some(x => h===x || h.endsWith('.'+x)); }
   catch(e){ return false; }
 }
 function isAlreadyAffiliate(u){
   try{ return new URL(u).pathname.includes('an_redir') || /origin_link=/.test(u); }
   catch(e){ return /an_redir/.test(u); }
 }
-function buildAffiliateLink(originLink, affiliateId, subIds){
-  // If it's already an an_redir link, just refresh affiliate_id/sub_id instead of double-wrapping.
+function buildAffiliateLink(originLink){
+  // Nếu link đã là an_redir -> chỉ thay affiliate_id/sub_id, không bọc 2 lần.
   const base = isAlreadyAffiliate(originLink)
-    ? originLink.split(/[?&]affiliate_id=/)[0]        // keep up to origin_link=..., drop old tracking
+    ? originLink.split(/[?&]affiliate_id=/)[0]
     : `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(originLink.trim())}`;
-  const sub = (subIds||[]).map(s=>s||'').join('-');
-  let out = `${base}&affiliate_id=${encodeURIComponent(affiliateId)}`;
+  const sub = CONFIG.SUB_IDS.map(s=>s||'').join('-');
+  let out = `${base}&affiliate_id=${encodeURIComponent(CONFIG.AFF_ID)}`;
   if(sub.replace(/-/g,'')) out += `&sub_id=${encodeURIComponent(sub)}`;
   return out;
 }
@@ -234,17 +187,19 @@ function toast(msg,type){ const t=$('#toast'); t.textContent=msg; t.className='t
 
 function generate(){
   const raw = $('#input').value.trim();
-  const affId = $('#affId').value.trim();
   $('#result').classList.remove('show');
 
+  if(!CONFIG.AFF_ID || CONFIG.AFF_ID==='14354840000'){
+    // cảnh báo nhẹ cho dev nếu quên đổi id mẫu — vẫn cho chạy để test
+    console.warn('CONFIG.AFF_ID đang là id mẫu, nhớ đổi thành id thật.');
+  }
   if(!raw){ setStatus('Hãy dán link Shopee trước.','err'); return; }
-  if(!affId){ setStatus('Chưa có Affiliate ID — mở phần Cấu hình bên dưới.','err'); $('#settings').open=true; $('#affId').focus(); return; }
 
   const url = extractUrl(raw);
   if(!url){ setStatus('Không tìm thấy link hợp lệ trong nội dung.','err'); return; }
   if(!isShopeeUrl(url) && !isAlreadyAffiliate(url)){ setStatus('Link này không phải domain Shopee.','err'); return; }
 
-  currentLink = buildAffiliateLink(url, affId, $$('.sub').map(i=>i.value.trim()));
+  currentLink = buildAffiliateLink(url);
   $('#linkBox').textContent = currentLink;
   $('#result').classList.add('show');
   setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
@@ -256,7 +211,6 @@ async function copyLink(){
     await navigator.clipboard.writeText(currentLink);
     toast('Đã sao chép link','ok');
   }catch(e){
-    // Fallback for older / insecure contexts
     const t=document.createElement('textarea'); t.value=currentLink; document.body.appendChild(t);
     t.select(); try{ document.execCommand('copy'); toast('Đã sao chép link','ok'); }
     catch(_){ toast('Không copy được, hãy chọn tay','err'); } t.remove();
@@ -266,7 +220,7 @@ async function copyLink(){
 async function pasteFromClipboard(){
   try{
     const txt = await navigator.clipboard.readText();
-    if(txt){ $('#input').value = txt.trim(); setStatus('Đã dán từ clipboard.'); generate(); }
+    if(txt){ $('#input').value = txt.trim(); generate(); }
     else toast('Clipboard trống','err');
   }catch(e){
     $('#input').focus();
@@ -277,16 +231,25 @@ async function pasteFromClipboard(){
 $('#genBtn').addEventListener('click', generate);
 $('#copyBtn').addEventListener('click', copyLink);
 $('#pasteBtn').addEventListener('click', pasteFromClipboard);
-// Open Shopee: the an_redir link is a universal/app link — on mobile it opens the app directly.
-// Same-tab navigation triggers the app more reliably than a new tab.
+$('#clearBtn').addEventListener('click', ()=>{ $('#input').value=''; $('#result').classList.remove('show'); setStatus(''); $('#input').focus(); });
+$('#input').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') generate(); });
+
+// Mở Shopee: link an_redir là universal/app link — mobile navigate same-tab để bung app chuẩn.
 $('#openBtn').addEventListener('click', ()=>{
   if(!currentLink) return;
   const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-  if(mobile) location.href = currentLink;          // OS intercepts -> opens Shopee app
-  else window.open(currentLink,'_blank','noopener'); // desktop -> new tab
+  if(mobile) location.href = currentLink;
+  else window.open(currentLink,'_blank','noopener');
 });
 
-/* ---------- install to home screen ---------- */
+/* Prefill từ URL param (share-target nhẹ trên Android) + tự tạo luôn */
+(function initFromUrl(){
+  const p = new URLSearchParams(location.search);
+  const shared = p.get('url') || p.get('text');
+  if(shared){ const u=extractUrl(shared); if(u){ $('#input').value=u; generate(); } }
+})();
+
+/* ---------- cài vào màn hình chính ---------- */
 (function initInstall(){
   const banner=$('#install'), btn=$('#installBtn'), close=$('#installClose'), tx=$('#installTx');
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -294,7 +257,7 @@ $('#openBtn').addEventListener('click', ()=>{
   if(isStandalone || sessionStorage.getItem('inst_hide')) return;
 
   let deferred=null;
-  window.addEventListener('beforeinstallprompt', e=>{           // Android / Chrome / Edge
+  window.addEventListener('beforeinstallprompt', e=>{
     e.preventDefault(); deferred=e; banner.classList.add('show');
   });
   btn.addEventListener('click', async ()=>{
@@ -302,7 +265,6 @@ $('#openBtn').addEventListener('click', ()=>{
   });
   close.addEventListener('click', ()=>{ banner.classList.remove('show'); sessionStorage.setItem('inst_hide','1'); });
 
-  // iOS Safari doesn't fire beforeinstallprompt -> show manual instructions.
   if(isiOS && !isStandalone){
     btn.style.display='none';
     tx.innerHTML='<b>Cài app trên iPhone</b><br>Bấm nút Chia sẻ ⬆️ → "Thêm vào MH chính".';
@@ -310,17 +272,7 @@ $('#openBtn').addEventListener('click', ()=>{
   }
 })();
 window.addEventListener('appinstalled', ()=> $('#install').classList.remove('show'));
-$('#clearBtn').addEventListener('click', ()=>{ $('#input').value=''; $('#result').classList.remove('show'); setStatus(''); $('#input').focus(); });
-$('#input').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') generate(); });
 
-/* Prefill from URL params too (works as a light share-target on Android) */
-(function initFromUrl(){
-  const p = new URLSearchParams(location.search);
-  const shared = p.get('url') || p.get('text');
-  if(shared){ const u=extractUrl(shared); if(u){ $('#input').value=u; } }
-})();
-
-loadCfg();
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
 </script>
 </body>
