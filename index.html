@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ee4d2d">
+<meta name="description" content="Tạo link tiếp thị liên kết Shopee rút gọn nhanh chóng.">
+<title>Shopee Aff Link</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<style>
+  :root{
+    --brand:#ee4d2d; --brand-d:#d73a21; --brand-l:#fff1ee;
+    --bg:#f4f5f7; --card:#ffffff; --ink:#1c1c1e; --muted:#8a8f98;
+    --line:#eceef1; --ok:#1aab6b; --err:#e0322b;
+    --radius:16px; --shadow:0 6px 24px rgba(20,20,30,.08);
+    --safe-t:env(safe-area-inset-top,0px);
+    --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink);
+    display:flex; flex-direction:column; align-items:center;
+    padding:calc(var(--safe-t) + 12px) 14px calc(var(--safe-b) + 24px);
+    min-height:100%;
+  }
+  .wrap{width:100%; max-width:480px; display:flex; flex-direction:column; gap:14px}
+
+  header{display:flex; align-items:center; gap:12px; padding:6px 2px}
+  .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#ff7337);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;box-shadow:var(--shadow)}
+  header h1{font-size:18px;margin:0;line-height:1.15}
+  header p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 8px;color:#3a3d44}
+  .hint{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.4}
+
+  textarea,input{
+    width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;
+    font-size:16px;background:#fafbfc;color:var(--ink);font-family:inherit;
+    transition:border-color .15s, background .15s;
+  }
+  textarea{resize:none;min-height:72px}
+  textarea:focus,input:focus{outline:none;border-color:var(--brand);background:#fff}
+
+  .row{display:flex;gap:10px}
+  .row>*{flex:1;min-width:0}
+
+  button{
+    border:none;border-radius:12px;font-size:16px;font-weight:700;
+    padding:14px;cursor:pointer;font-family:inherit;
+    transition:transform .06s, background .15s, opacity .15s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  button:active{transform:scale(.97)}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:active{background:var(--brand-d)}
+  .btn-ghost{background:var(--brand-l);color:var(--brand)}
+  .btn-line{background:#fff;color:#3a3d44;border:1.5px solid var(--line)}
+  .btn-open{background:#111;color:#fff}
+  button:disabled{opacity:.5;cursor:not-allowed}
+
+  .result{display:none;flex-direction:column;gap:12px}
+  .result.show{display:flex;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .link-box{
+    background:var(--brand-l);border:1.5px dashed rgba(238,77,45,.35);
+    border-radius:12px;padding:12px 14px;font-size:14px;word-break:break-all;
+    color:#7a2417;line-height:1.5;
+  }
+
+  details.settings{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:2px 4px}
+  details.settings>summary{
+    list-style:none;cursor:pointer;padding:14px;font-size:14px;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;color:#3a3d44;
+  }
+  details.settings>summary::-webkit-details-marker{display:none}
+  .chev{transition:transform .2s;color:var(--muted)}
+  details[open] .chev{transform:rotate(180deg)}
+  .settings-body{padding:0 14px 16px;display:flex;flex-direction:column;gap:12px}
+  .sub-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .sub-grid input{padding:10px 6px;text-align:center;font-size:13px}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(var(--safe-b) + 22px);transform:translateX(-50%) translateY(20px);
+    background:#111;color:#fff;padding:12px 20px;border-radius:30px;font-size:14px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--err)}
+  .toast.ok{background:var(--ok)}
+
+  .status{font-size:13px;font-weight:600;min-height:18px;text-align:center;color:var(--muted)}
+  footer{font-size:11.5px;color:var(--muted);text-align:center;padding:4px 8px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">S</div>
+    <div>
+      <h1>Shopee Aff Link</h1>
+      <p>Dán link Shopee → tạo link tiếp thị liên kết</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <label for="input">Link sản phẩm / shop Shopee</label>
+    <textarea id="input" inputmode="url" autocomplete="off" spellcheck="false"
+      placeholder="Dán link vào đây, ví dụ: https://shopee.vn/..."></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn-ghost" id="pasteBtn" type="button">📋 Dán</button>
+      <button class="btn-line" id="clearBtn" type="button">✕ Xóa</button>
+    </div>
+    <button class="btn-primary" id="genBtn" type="button" style="margin-top:10px;width:100%">
+      ✨ Tạo link Affiliate
+    </button>
+    <div class="status" id="status"></div>
+
+    <div class="result" id="result">
+      <div class="link-box" id="linkBox"></div>
+      <div class="row">
+        <button class="btn-primary" id="copyBtn" type="button">Sao chép</button>
+        <button class="btn-open" id="openBtn" type="button">Mở Shopee</button>
+      </div>
+    </div>
+  </div>
+
+  <details class="settings" id="settings">
+    <summary>
+      <span>⚙️ Cấu hình Affiliate ID &amp; Sub ID</span>
+      <span class="chev">▾</span>
+    </summary>
+    <div class="settings-body">
+      <div>
+        <label for="affId">Affiliate ID (bắt buộc)</label>
+        <input id="affId" inputmode="numeric" autocomplete="off" placeholder="VD: 14354840000">
+      </div>
+      <div>
+        <label>Sub ID (tối đa 5, tùy chọn)</label>
+        <div class="sub-grid">
+          <input class="sub" placeholder="1" autocomplete="off">
+          <input class="sub" placeholder="2" autocomplete="off">
+          <input class="sub" placeholder="3" autocomplete="off">
+          <input class="sub" placeholder="4" autocomplete="off">
+          <input class="sub" placeholder="5" autocomplete="off">
+        </div>
+        <p class="hint">Cấu hình được lưu trên máy bạn, chỉ nhập một lần.</p>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    Link tạo theo công thức chính thức của Shopee (<code>s.shopee.vn/an_redir</code>).<br>
+    Dữ liệu xử lý ngay trên trình duyệt, không gửi đi đâu.
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const KEY = 'aff_cfg_v1';
+const SHOPEE_HOSTS = ['shopee.vn','shopee.com','shope.ee','shopee.sg','s.shopee.vn','s.shopee.sg'];
+
+/* ---------- config persistence ---------- */
+function loadCfg(){
+  try{
+    const c = JSON.parse(localStorage.getItem(KEY)||'{}');
+    if(c.affId) $('#affId').value = c.affId;
+    (c.subs||[]).forEach((v,i)=>{ if($$('.sub')[i]) $$('.sub')[i].value = v||''; });
+  }catch(e){}
+}
+function saveCfg(){
+  const cfg = { affId: $('#affId').value.trim(), subs: $$('.sub').map(i=>i.value.trim()) };
+  localStorage.setItem(KEY, JSON.stringify(cfg));
+}
+$('#affId').addEventListener('input', saveCfg);
+$$('.sub').forEach(i=>i.addEventListener('input', saveCfg));
+
+/* ---------- core: build affiliate link (Shopee official formula) ---------- */
+function extractUrl(text){
+  if(!text) return null;
+  const m = String(text).match(/(https?:\/\/[^\s"'<>]+)/i);
+  return m ? m[0] : null;
+}
+function isShopeeUrl(u){
+  try{ return SHOPEE_HOSTS.some(h => new URL(u).hostname.replace(/^www\./,'') === h || new URL(u).hostname.endsWith('.'+h)); }
+  catch(e){ return false; }
+}
+function isAlreadyAffiliate(u){
+  try{ return new URL(u).pathname.includes('an_redir') || /origin_link=/.test(u); }
+  catch(e){ return /an_redir/.test(u); }
+}
+function buildAffiliateLink(originLink, affiliateId, subIds){
+  // If it's already an an_redir link, just refresh affiliate_id/sub_id instead of double-wrapping.
+  const base = isAlreadyAffiliate(originLink)
+    ? originLink.split(/[?&]affiliate_id=/)[0]        // keep up to origin_link=..., drop old tracking
+    : `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(originLink.trim())}`;
+  const sub = (subIds||[]).map(s=>s||'').join('-');
+  let out = `${base}&affiliate_id=${encodeURIComponent(affiliateId)}`;
+  if(sub.replace(/-/g,'')) out += `&sub_id=${encodeURIComponent(sub)}`;
+  return out;
+}
+
+/* ---------- UI actions ---------- */
+let currentLink = '';
+function setStatus(msg,type){ const s=$('#status'); s.textContent=msg||''; s.style.color = type==='err' ? 'var(--err)' : type==='ok' ? 'var(--ok)' : 'var(--muted)'; }
+function toast(msg,type){ const t=$('#toast'); t.textContent=msg; t.className='toast show '+(type||''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',1800); }
+
+function generate(){
+  const raw = $('#input').value.trim();
+  const affId = $('#affId').value.trim();
+  $('#result').classList.remove('show');
+
+  if(!raw){ setStatus('Hãy dán link Shopee trước.','err'); return; }
+  if(!affId){ setStatus('Chưa có Affiliate ID — mở phần Cấu hình bên dưới.','err'); $('#settings').open=true; $('#affId').focus(); return; }
+
+  const url = extractUrl(raw);
+  if(!url){ setStatus('Không tìm thấy link hợp lệ trong nội dung.','err'); return; }
+  if(!isShopeeUrl(url) && !isAlreadyAffiliate(url)){ setStatus('Link này không phải domain Shopee.','err'); return; }
+
+  currentLink = buildAffiliateLink(url, affId, $$('.sub').map(i=>i.value.trim()));
+  $('#linkBox').textContent = currentLink;
+  $('#result').classList.add('show');
+  setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
+}
+
+async function copyLink(){
+  if(!currentLink) return;
+  try{
+    await navigator.clipboard.writeText(currentLink);
+    toast('Đã sao chép link','ok');
+  }catch(e){
+    // Fallback for older / insecure contexts
+    const t=document.createElement('textarea'); t.value=currentLink; document.body.appendChild(t);
+    t.select(); try{ document.execCommand('copy'); toast('Đã sao chép link','ok'); }
+    catch(_){ toast('Không copy được, hãy chọn tay','err'); } t.remove();
+  }
+}
+
+async function pasteFromClipboard(){
+  try{
+    const txt = await navigator.clipboard.readText();
+    if(txt){ $('#input').value = txt.trim(); setStatus('Đã dán từ clipboard.'); generate(); }
+    else toast('Clipboard trống','err');
+  }catch(e){
+    $('#input').focus();
+    toast('Trình duyệt chặn đọc clipboard — dán tay nhé','err');
+  }
+}
+
+$('#genBtn').addEventListener('click', generate);
+$('#copyBtn').addEventListener('click', copyLink);
+$('#pasteBtn').addEventListener('click', pasteFromClipboard);
+$('#openBtn').addEventListener('click', ()=>{ if(currentLink) window.open(currentLink,'_blank','noopener'); });
+$('#clearBtn').addEventListener('click', ()=>{ $('#input').value=''; $('#result').classList.remove('show'); setStatus(''); $('#input').focus(); });
+$('#input').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') generate(); });
+
+/* Prefill from URL params too (works as a light share-target on Android) */
+(function initFromUrl(){
+  const p = new URLSearchParams(location.search);
+  const shared = p.get('url') || p.get('text');
+  if(shared){ const u=extractUrl(shared); if(u){ $('#input').value=u; } }
+})();
+
+loadCfg();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>
