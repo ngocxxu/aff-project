@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aff-project",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Static files served from ./public (KHÔNG để "." — tránh phơi .git/source ra web).
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  // Affiliate config. AFF_ID không phải secret (nó lộ trong mọi link), để đây tiện versioning.
+  // Muốn đổi mà không sửa code: set lại ở Dashboard > Settings > Variables.
+  "vars": {
+    "AFF_ID": "17360510496",
+    "SUB_ID": "affProject"
+  }
+}
