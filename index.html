@@ -219,6 +219,10 @@ async function generate(){
   setStatus('⏳ Đang bung link rút gọn...','');
   try{
     const res = await fetch('/api/build?url=' + encodeURIComponent(url));
+    const ct = res.headers.get('content-type') || '';
+    if(!ct.includes('application/json')){
+      throw new Error('API chưa chạy. Deploy lên Cloudflare, hoặc chạy "wrangler pages dev ." (đừng dùng server tĩnh thường).');
+    }
     const data = await res.json();
     if(!res.ok || !data.link) throw new Error(data.error || 'Server lỗi');
     showResult(data.link);
