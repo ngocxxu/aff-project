@@ -153,13 +153,15 @@ const CONFIG = {
 /* ===================================================================== */
 
 const $ = s => document.querySelector(s);
-const SHOPEE_HOSTS = ['shopee.vn','shopee.com','shope.ee','shopee.sg','s.shopee.vn','s.shopee.sg'];
+const SHOPEE_HOSTS = ['shopee.vn','shopee.com','shope.ee','shp.ee','shopee.sg','s.shopee.vn','s.shopee.sg'];
 
 /* ---------- core: build affiliate link (công thức chính thức Shopee) ---------- */
 function extractUrl(text){
   if(!text) return null;
   const m = String(text).match(/(https?:\/\/[^\s"'<>]+)/i);
-  return m ? m[0] : null;
+  if(!m) return null;
+  // bỏ dấu câu/ký tự thừa dính cuối URL (., !, ), …)
+  return m[0].replace(/[)\].,!?;:'"»”]+$/,'');
 }
 function isShopeeUrl(u){
   try{ const h=new URL(u).hostname.replace(/^www\./,''); return SHOPEE_HOSTS.some(x => h===x || h.endsWith('.'+x)); }
