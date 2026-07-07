@@ -171,6 +171,10 @@ function isAlreadyAffiliate(u){
   try{ return new URL(u).pathname.includes('an_redir') || /origin_link=/.test(u); }
   catch(e){ return /an_redir/.test(u); }
 }
+function isShortLink(u){
+  try{ const h=new URL(u).hostname.replace(/^www\./,''); return h==='shp.ee'||h.endsWith('.shp.ee')||h==='shope.ee'||h.endsWith('.shope.ee'); }
+  catch(e){ return false; }
+}
 function buildAffiliateLink(originLink){
   // Nếu link đã là an_redir -> chỉ thay affiliate_id/sub_id, không bọc 2 lần.
   const base = isAlreadyAffiliate(originLink)
@@ -187,24 +191,42 @@ let currentLink = '';
 function setStatus(msg,type){ const s=$('#status'); s.textContent=msg||''; s.style.color = type==='err' ? 'var(--err)' : type==='ok' ? 'var(--ok)' : 'var(--muted)'; }
 function toast(msg,type){ const t=$('#toast'); t.textContent=msg; t.className='toast show '+(type||''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',1800); }
 
-function generate(){
+function showResult(link){
+  currentLink = link;
+  $('#linkBox').textContent = link;
+  $('#result').classList.add('show');
+  setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
+}
+
+async function generate(){
   const raw = $('#input').value.trim();
   $('#result').classList.remove('show');
 
-  if(!CONFIG.AFF_ID || CONFIG.AFF_ID==='14354840000'){
-    // cảnh báo nhẹ cho dev nếu quên đổi id mẫu — vẫn cho chạy để test
-    console.warn('CONFIG.AFF_ID đang là id mẫu, nhớ đổi thành id thật.');
-  }
   if(!raw){ setStatus('Hãy dán link Shopee trước.','err'); return; }
 
   const url = extractUrl(raw);
   if(!url){ setStatus('Không tìm thấy link hợp lệ trong nội dung.','err'); return; }
   if(!isShopeeUrl(url) && !isAlreadyAffiliate(url)){ setStatus('Link này không phải domain Shopee.','err'); return; }
 
-  currentLink = buildAffiliateLink(url);
-  $('#linkBox').textContent = currentLink;
-  $('#result').classList.add('show');
-  setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
+  // Link ĐẦY ĐỦ (không phải rút gọn) & chưa affiliate -> ghép ngay ở client, không cần server.
+  if(!isShortLink(url)){
+    showResult(buildAffiliateLink(url));
+    return;
+  }
+
+  // Link rút gọn (vn.shp.ee/...) -> gọi server bung link đầy đủ rồi mới bọc an_redir.
+  $('#genBtn').disabled = true;
+  setStatus('⏳ Đang bung link rút gọn...','');
+  try{
+    const res = await fetch('/api/build?url=' + encodeURIComponent(url));
+    const data = await res.json();
+    if(!res.ok || !data.link) throw new Error(data.error || 'Server lỗi');
+    showResult(data.link);
+  }catch(err){
+    setStatus('Không bung được link rút gọn: ' + err.message, 'err');
+  }finally{
+    $('#genBtn').disabled = false;
+  }
 }
 
 async function copyLink(){

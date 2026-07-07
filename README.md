@@ -28,11 +28,35 @@ Nguồn: Hướng dẫn tạo link Tiếp thị liên kết rút gọn — Shope
 ## Cấu trúc
 
 ```
-index.html      # toàn bộ UI + logic (1 file)
-manifest.json   # PWA manifest
-sw.js           # service worker (cài PWA + offline)
-icons/          # icon PWA 192 / 512 / maskable
+index.html            # toàn bộ UI + logic (1 file)
+functions/api/build.js# Cloudflare Pages Function: bung link rút gọn + bọc an_redir
+manifest.json         # PWA manifest
+sw.js                 # service worker (cài PWA + offline)
+icons/                # icon PWA 192 / 512 / maskable
 ```
+
+## Link rút gọn (vn.shp.ee) — vì sao cần Pages Function
+
+Link user copy từ app Shopee thường là **link rút gọn** (`vn.shp.ee/xxx`).
+`an_redir` chỉ nhận link `shopee.vn` **đầy đủ** — bọc thẳng link rút gọn sẽ
+văng ra `shope.ee/error_page`. Nên `functions/api/build.js` chạy server-side
+để **follow redirect bung link ngắn -> link đầy đủ**, cắt param rác, rồi mới bọc
+affiliate. (Client không tự làm được vì CORS chặn đọc redirect.)
+
+- Link `shopee.vn` đầy đủ: frontend ghép ngay ở client, không gọi server.
+- Link rút gọn: frontend gọi `/api/build?url=...` để server bung + bọc.
+
+### Cấu hình Affiliate ID cho Function
+
+Đặt Environment Variables trong **Cloudflare Pages > Settings > Environment variables**:
+
+| Biến     | Bắt buộc | Ví dụ            |
+|----------|----------|------------------|
+| `AFF_ID` | có       | `17360510496`    |
+| `SUB_ID` | không    | `affProject-fb`  |
+
+Không set thì Function dùng giá trị mặc định trong `build.js`. Frontend (`index.html`)
+cũng có `CONFIG` riêng cho nhánh link đầy đủ — nhớ để 2 chỗ trùng aff id.
 
 ## Deploy lên Cloudflare Pages
 
