@@ -92,6 +92,26 @@
   .install .tx b{font-size:13.5px}
   .install button{padding:9px 14px;font-size:13px;border-radius:10px;background:var(--brand);color:#fff;flex:0 0 auto}
   .install .x{background:transparent;color:#9aa0aa;padding:6px;font-size:18px}
+
+  /* trust / uy tín */
+  .assure{display:flex;gap:8px;align-items:flex-start;background:#f0fbf5;border:1px solid #cdeeda;
+    border-radius:12px;padding:10px 12px;font-size:12.5px;color:#1a7a4d;line-height:1.45}
+  .assure b{color:#12603c}
+  .dest{background:#f4f9ff;border:1px solid #d7e8fb;border-radius:12px;padding:10px 12px;font-size:13px;
+    color:#245a94;word-break:break-all;line-height:1.45}
+  .dest .ok{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:#1a7a4d;margin-bottom:3px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#1aab6b;display:inline-block}
+  details.whatis{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+  details.whatis>summary{list-style:none;cursor:pointer;padding:14px;font-size:13.5px;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;color:#3a3d44}
+  details.whatis>summary::-webkit-details-marker{display:none}
+  details.whatis .body{padding:0 14px 16px;font-size:12.5px;color:#5a5f68;line-height:1.6}
+  details.whatis .body a{color:var(--brand)}
+  details.whatis .body ul{margin:8px 0 0;padding-left:18px}
+  .preview{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .preview img{width:56px;height:56px;border-radius:8px;object-fit:cover;flex:0 0 auto;background:#eee}
+  .preview .t{font-size:13px;font-weight:600;color:#1c1c1e;line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
 <body>
@@ -126,6 +146,14 @@
     <div class="status" id="status"></div>
 
     <div class="result" id="result">
+      <div class="dest" id="dest">
+        <div class="preview" id="preview" style="display:none">
+          <img id="pvImg" alt="" referrerpolicy="no-referrer">
+          <div class="t" id="pvTitle"></div>
+        </div>
+        <span class="ok"><span class="dot"></span> Dẫn tới trang chính thức Shopee</span>
+        <div id="destUrl"></div>
+      </div>
       <div class="link-box" id="linkBox"></div>
       <div class="row">
         <button class="btn-primary" id="copyBtn" type="button">Sao chép</button>
@@ -134,9 +162,28 @@
     </div>
   </div>
 
+  <div class="assure">
+    <span>🔒</span>
+    <span><b>An toàn:</b> app chỉ gắn mã giới thiệu vào link Shopee.
+    Không hỏi mật khẩu, không đăng nhập, không thu thập dữ liệu của bạn.</span>
+  </div>
+
+  <details class="whatis">
+    <summary><span>❓ Link này là gì? Có an toàn không?</span><span class="chev">▾</span></summary>
+    <div class="body">
+      Link tạo ra dùng cơ chế <code>s.shopee.vn/an_redir</code> — đây là <b>công thức
+      chính thức của Shopee</b> để gắn mã tiếp thị liên kết, không phải bên thứ ba tự chế.
+      <ul>
+        <li>Link luôn dẫn về đúng <b>shopee.vn</b> — bạn thấy rõ đích đến ở trên.</li>
+        <li>App chạy trên trình duyệt của bạn, <b>không có tài khoản, không lưu gì</b>.</li>
+        <li>Người tạo link nhận hoa hồng từ Shopee khi bạn mua — <b>giá bạn trả không đổi</b>.</li>
+      </ul>
+      Tham khảo: <a href="https://help.shopee.vn/portal/10/article/172955" target="_blank" rel="noopener">Hướng dẫn tạo link Tiếp thị liên kết — Shopee</a>.
+    </div>
+  </details>
+
   <footer>
-    Link tạo theo công thức chính thức của Shopee (<code>s.shopee.vn/an_redir</code>).<br>
-    Dữ liệu xử lý ngay trên trình duyệt, không gửi đi đâu.
+    Công cụ tạo link tiếp thị liên kết Shopee. Xử lý an toàn qua HTTPS.
   </footer>
 </div>
 
@@ -191,9 +238,25 @@ let currentLink = '';
 function setStatus(msg,type){ const s=$('#status'); s.textContent=msg||''; s.style.color = type==='err' ? 'var(--err)' : type==='ok' ? 'var(--ok)' : 'var(--muted)'; }
 function toast(msg,type){ const t=$('#toast'); t.textContent=msg; t.className='toast show '+(type||''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',1800); }
 
-function showResult(link){
+function landingOf(u){
+  // link đích sạch để hiện cho user thấy đi về đâu
+  try{ const x=new URL(u); x.search=''; x.hash=''; return x.toString(); }
+  catch(e){ return u || ''; }
+}
+function showResult(link, landing, image, title){
   currentLink = link;
   $('#linkBox').textContent = link;
+  const dest = landing || '';
+  if(dest){ $('#destUrl').textContent = dest; $('#dest').style.display='block'; }
+  else { $('#dest').style.display='none'; }
+  // thumbnail + tên sản phẩm (nếu server trả về)
+  if(image){
+    $('#pvImg').src = image;
+    $('#pvTitle').textContent = title || '';
+    $('#preview').style.display = 'flex';
+  }else{
+    $('#preview').style.display = 'none';
+  }
   $('#result').classList.add('show');
   setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
 }
@@ -210,7 +273,8 @@ async function generate(){
 
   // Link ĐẦY ĐỦ (không phải rút gọn) & chưa affiliate -> ghép ngay ở client, không cần server.
   if(!isShortLink(url)){
-    showResult(buildAffiliateLink(url));
+    const dest = isAlreadyAffiliate(url) ? '' : landingOf(url);
+    showResult(buildAffiliateLink(url), dest);
     return;
   }
 
@@ -224,13 +288,13 @@ async function generate(){
       throw new Error('Server trả về rỗng (HTTP ' + res.status + '). Thử lại — có thể link nguồn phản hồi chậm.');
     }
     if(/^\s*</.test(rawBody)){
-      throw new Error('API chưa chạy. Deploy lên Cloudflare, hoặc chạy "wrangler pages dev ." (đừng dùng server tĩnh thường).');
+      throw new Error('API chưa chạy. Deploy lên Cloudflare, hoặc chạy "wrangler dev" (đừng dùng server tĩnh thường).');
     }
     let data;
     try{ data = JSON.parse(rawBody); }
     catch(e){ throw new Error('Server trả về không hợp lệ (HTTP ' + res.status + '): ' + rawBody.slice(0,120)); }
     if(!res.ok || !data.link) throw new Error(data.error || ('Server lỗi (HTTP ' + res.status + ')'));
-    showResult(data.link);
+    showResult(data.link, data.landing, data.image, data.title);
   }catch(err){
     setStatus('Không bung được link rút gọn: ' + err.message, 'err');
   }finally{
