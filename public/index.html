@@ -68,8 +68,9 @@
   .link-box{
     background:var(--brand-l);border:1.5px dashed rgba(238,77,45,.35);
     border-radius:12px;padding:12px 14px;font-size:14px;word-break:break-all;
-    color:#7a2417;line-height:1.5;
+    color:#7a2417;line-height:1.5;cursor:pointer;transition:background .15s;
   }
+  .link-box:active{background:#ffe3db}
 
   .toast{
     position:fixed;left:50%;bottom:calc(var(--safe-b) + 22px);transform:translateX(-50%) translateY(20px);
@@ -98,8 +99,10 @@
     border-radius:12px;padding:10px 12px;font-size:12.5px;color:#1a7a4d;line-height:1.45}
   .assure b{color:#12603c}
   .dest{background:#f4f9ff;border:1px solid #d7e8fb;border-radius:12px;padding:10px 12px;font-size:13px;
-    color:#245a94;word-break:break-all;line-height:1.45}
-  .dest .ok{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:#1a7a4d;margin-bottom:3px}
+    color:#245a94;line-height:1.45}
+  .dest .ok{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:#1a7a4d}
+  .link-label{font-size:12.5px;color:#8a4a2d;margin:2px 2px 0}
+  .link-label b{color:var(--brand)}
   .dot{width:7px;height:7px;border-radius:50%;background:#1aab6b;display:inline-block}
   details.whatis{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
   details.whatis>summary{list-style:none;cursor:pointer;padding:14px;font-size:13.5px;font-weight:600;
@@ -151,12 +154,13 @@
           <img id="pvImg" alt="" referrerpolicy="no-referrer">
           <div class="t" id="pvTitle"></div>
         </div>
-        <span class="ok"><span class="dot"></span> Dẫn tới trang chính thức Shopee</span>
-        <div id="destUrl"></div>
+        <span class="ok"><span class="dot"></span> Sản phẩm trên shopee.vn (chính thức)</span>
       </div>
-      <div class="link-box" id="linkBox"></div>
+
+      <div class="link-label">📎 Link Affiliate của bạn — <b>copy link này</b></div>
+      <div class="link-box" id="linkBox" title="Bấm để sao chép"></div>
       <div class="row">
-        <button class="btn-primary" id="copyBtn" type="button">Sao chép</button>
+        <button class="btn-primary" id="copyBtn" type="button">📋 Sao chép link</button>
         <button class="btn-open" id="openBtn" type="button">Mở Shopee</button>
       </div>
     </div>
@@ -246,9 +250,7 @@ function landingOf(u){
 function showResult(link, landing, image, title){
   currentLink = link;
   $('#linkBox').textContent = link;
-  const dest = landing || '';
-  if(dest){ $('#destUrl').textContent = dest; $('#dest').style.display='block'; }
-  else { $('#dest').style.display='none'; }
+  $('#dest').style.display = 'block';
   // thumbnail + tên sản phẩm (nếu server trả về)
   if(image){
     $('#pvImg').src = image;
@@ -258,7 +260,7 @@ function showResult(link, landing, image, title){
     $('#preview').style.display = 'none';
   }
   $('#result').classList.add('show');
-  setStatus('✅ Đã tạo link — sao chép hoặc mở ngay.','ok');
+  setStatus('✅ Đã tạo link — bấm "Sao chép link".','ok');
 }
 
 async function generate(){
@@ -326,6 +328,7 @@ async function pasteFromClipboard(){
 
 $('#genBtn').addEventListener('click', generate);
 $('#copyBtn').addEventListener('click', copyLink);
+$('#linkBox').addEventListener('click', copyLink); // bấm vào link cũng copy -> không copy nhầm
 $('#pasteBtn').addEventListener('click', pasteFromClipboard);
 $('#clearBtn').addEventListener('click', ()=>{ $('#input').value=''; $('#result').classList.remove('show'); setStatus(''); $('#input').focus(); });
 $('#input').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') generate(); });
