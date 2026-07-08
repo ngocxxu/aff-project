@@ -59,6 +59,52 @@ function buildAffiliate(landing, affId, subId){
   return out;
 }
 
+function decodeEntities(s){
+  if(!s) return '';
+  return s
+    .replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#0?39;/g,"'")
+    .replace(/&#x27;/gi,"'").replace(/&apos;/g,"'")
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();
+}
+
+/** Đọc thẻ og:<prop> từ HTML (chấp nhận content trước/sau property). */
+function ogTag(html, prop){
+  const p = prop.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const res = [
+    new RegExp('<meta[^>]+property=["\\\']og:'+p+'["\\\'][^>]*\\bcontent=["\\\']([^"\\\']+)', 'i'),
+    new RegExp('<meta[^>]+content=["\\\']([^"\\\']+)["\\\'][^>]*\\bproperty=["\\\']og:'+p+'["\\\']', 'i'),
+    new RegExp('<meta[^>]+name=["\\\']og:'+p+'["\\\'][^>]*\\bcontent=["\\\']([^"\\\']+)', 'i')
+  ];
+  for(const re of res){ const m = html.match(re); if(m) return decodeEntities(m[1]); }
+  return '';
+}
+
+/**
+ * Lấy ảnh + tên sản phẩm (best-effort). Shopee chỉ trả thẻ og cho crawler mạng xã hội,
+ * nên giả User-Agent facebookexternalhit để nhận HTML có og:image / og:title.
+ * Thất bại thì trả rỗng, không chặn việc tạo link.
+ */
+async function fetchPreview(landing){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 6000);
+  try{
+    const res = await fetch(landing, {
+      redirect: 'follow',
+      signal: ctrl.signal,
+      headers: {
+        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+        'Accept': 'text/html,application/xhtml+xml'
+      }
+    });
+    const html = await res.text();
+    return { title: ogTag(html, 'title'), image: ogTag(html, 'image') };
+  }catch(e){
+    return { title: '', image: '' };
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 async function handleBuild(request, env){
   const affId = (env && env.AFF_ID) || DEFAULT_AFF_ID;
   const subId = (env && env.SUB_ID) || DEFAULT_SUB_ID;
@@ -86,7 +132,13 @@ async function handleBuild(request, env){
     }
 
     const clean = cleanLanding(landing);
-    return json({ link: buildAffiliate(clean, affId, subId), landing: clean });
+    const preview = await fetchPreview(clean);   // best-effort: ảnh + tên
+    return json({
+      link: buildAffiliate(clean, affId, subId),
+      landing: clean,
+      image: preview.image,
+      title: preview.title
+    });
   }catch(err){
     return json({ error: 'Lỗi khi bung link: ' + (err && err.message || err) }, 500);
   }

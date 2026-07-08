@@ -271,16 +271,9 @@ async function generate(){
   if(!url){ setStatus('Không tìm thấy link hợp lệ trong nội dung.','err'); return; }
   if(!isShopeeUrl(url) && !isAlreadyAffiliate(url)){ setStatus('Link này không phải domain Shopee.','err'); return; }
 
-  // Link ĐẦY ĐỦ (không phải rút gọn) & chưa affiliate -> ghép ngay ở client, không cần server.
-  if(!isShortLink(url)){
-    const dest = isAlreadyAffiliate(url) ? '' : landingOf(url);
-    showResult(buildAffiliateLink(url), dest);
-    return;
-  }
-
-  // Link rút gọn (vn.shp.ee/...) -> gọi server bung link đầy đủ rồi mới bọc an_redir.
+  // Gọi server: bung link rút gọn (nếu cần) + lấy ảnh/tên sản phẩm.
   $('#genBtn').disabled = true;
-  setStatus('⏳ Đang bung link rút gọn...','');
+  setStatus('⏳ Đang lấy thông tin sản phẩm...','');
   try{
     const res = await fetch('/api/build?url=' + encodeURIComponent(url));
     const rawBody = await res.text();
@@ -296,7 +289,13 @@ async function generate(){
     if(!res.ok || !data.link) throw new Error(data.error || ('Server lỗi (HTTP ' + res.status + ')'));
     showResult(data.link, data.landing, data.image, data.title);
   }catch(err){
-    setStatus('Không bung được link rút gọn: ' + err.message, 'err');
+    // Server lỗi/mất mạng: link ĐẦY ĐỦ vẫn ghép được ở client (không có ảnh).
+    if(!isShortLink(url)){
+      showResult(buildAffiliateLink(url), isAlreadyAffiliate(url) ? '' : landingOf(url));
+      setStatus('✅ Đã tạo link (không lấy được ảnh sản phẩm).','ok');
+    }else{
+      setStatus('Không bung được link rút gọn: ' + err.message, 'err');
+    }
   }finally{
     $('#genBtn').disabled = false;
   }
